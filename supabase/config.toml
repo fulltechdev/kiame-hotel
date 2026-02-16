@@ -1,1 +1,22 @@
 project_id = "fcmeiimaibuhosirrsmz"
+
+# Studio: URL da API para o browser (obrigatório para Storage funcionar no local)
+# Nota: "Failed to load log drains" em Settings é esperado em local — Log Drains é só na cloud
+# (Team/Enterprise). Não existe opção no config.toml para ativar/desativar; pode ignorar o erro.
+[studio]
+enabled = true
+api_url = "http://127.0.0.1:54321"
+
+# Storage (garantir que está ativo)
+[storage]
+enabled = true
+
+# Edge Functions (cada função deve ser declarada para ser servida e deployada)
+[functions]
+# create-user: utilizada pelo admin para criar clientes sem fazer login
+[functions.create-user]
+verify_jwt = false
+
+# Desativar analytics no local (evita container unhealthy no Windows)
+[analytics]
+enabled = false

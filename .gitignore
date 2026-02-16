@@ -1,3 +1,5 @@
+.env
+
 # Logs
 logs
 *.log
@@ -11,6 +13,9 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Supabase Edge Functions – nunca commitar chaves
+supabase/functions/.env
 
 # Editor directories and files
 .vscode/*

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Star, Shield, MapPin, Phone, Mail, Users, ArrowRight } from "lucide-react";
+import { Star, Shield, MapPin, Phone, Mail, Users, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,7 @@ import roomStandard from "@/assets/room-standard.jpg";
 import roomSuperior from "@/assets/room-superior.jpg";
 import roomSuite from "@/assets/room-suite.jpg";
 import roomDeluxe from "@/assets/room-deluxe.jpg";
+import { formatKz } from "@/lib/utils";
 
 const heroImages = [hero1, hero2, hero3];
 const heroTexts = [
@@ -161,7 +162,7 @@ export default function Index() {
                           <p className="text-xs uppercase tracking-wider text-accent font-medium mb-2">{room.type}</p>
                           <h3 className="font-display text-xl font-semibold text-foreground mb-2">{room.name}</h3>
                           <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{room.description}</p>
-                          <p className="text-lg font-semibold text-foreground">€{room.price_per_night}<span className="text-sm text-muted-foreground font-normal">/noite</span></p>
+                          <p className="text-lg font-semibold text-foreground">{formatKz(room.price_per_night)}<span className="text-sm text-muted-foreground font-normal">/noite</span></p>
                         </CardContent>
                       </Card>
                     </CarouselItem>
@@ -213,7 +214,7 @@ export default function Index() {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Morada</p>
-                  <p className="text-sm text-muted-foreground">Rua da Elegância, 42 — Lisboa, Portugal</p>
+                  <p className="text-sm text-muted-foreground">Rua Comandante Bula — Uige, Angola</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -222,7 +223,7 @@ export default function Index() {
                 </div>
                 <div>
                   <p className="font-medium text-foreground">Telefone</p>
-                  <p className="text-sm text-muted-foreground">+351 912 345 678</p>
+                  <p className="text-sm text-muted-foreground">+244 912 345 678</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">

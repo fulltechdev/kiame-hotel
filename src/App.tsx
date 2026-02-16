@@ -11,12 +11,16 @@ import Register from "./pages/Register";
 import Pesquisa from "./pages/Pesquisa";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import AdminRoomForm from "./pages/AdminRoomForm";
+import AdminReservationNew from "./pages/AdminReservationNew";
 import NotFound from "./pages/NotFound";
+import { ThemeProvider } from "./components/theme-provider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -29,11 +33,15 @@ const App = () => (
             <Route path="/pesquisa" element={<Pesquisa />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/admin/quartos/novo" element={<AdminRoute><AdminRoomForm /></AdminRoute>} />
+            <Route path="/admin/quartos/:id" element={<AdminRoute><AdminRoomForm /></AdminRoute>} />
+            <Route path="/admin/reservas/novo" element={<AdminRoute><AdminReservationNew /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

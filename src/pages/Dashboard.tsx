@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { formatKz } from "@/lib/utils";
 
 interface Reservation {
   id: string;
@@ -25,22 +26,33 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchReservations = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("reservations")
-      .select("*, rooms(name, type, image_url, price_per_night)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setReservations((data as unknown as Reservation[]) || []);
-    setLoading(false);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data } = await supabase
+        .from("reservations")
+        .select("*, rooms(name, type, image_url, price_per_night)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      console.log(data);
+      setReservations((data as unknown as Reservation[]) || []);
+    } catch (error) {
+      toast.error("Erro ao carregar reservas: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchReservations(); }, [user]);
+  useEffect(() => {
+    fetchReservations();
+  }, []);
 
   const cancelReservation = async (id: string) => {
     const { error } = await supabase.from("reservations").update({ status: "cancelada" }).eq("id", id);
@@ -58,7 +70,7 @@ export default function Dashboard() {
       <main className="flex-1 pt-24 pb-16">
         <div className="container mx-auto px-4">
           <h1 className="font-display text-4xl font-bold text-foreground mb-2">As Minhas Reservas</h1>
-          <p className="text-muted-foreground mb-10">Consulte e gira as suas reservas</p>
+          <p className="text-muted-foreground mb-10">Consulte aqui as suas reservas</p>
 
           {loading ? (
             <div className="text-center text-muted-foreground py-12">A carregar...</div>
@@ -85,7 +97,7 @@ export default function Dashboard() {
                       <CalendarDays className="w-4 h-4" />
                       <span>{new Date(r.check_in).toLocaleDateString("pt-PT")} — {new Date(r.check_out).toLocaleDateString("pt-PT")}</span>
                     </div>
-                    <p className="text-sm text-foreground font-medium">€{r.rooms?.price_per_night}/noite</p>
+                    <p className="text-sm text-foreground font-medium">{formatKz(r.rooms?.price_per_night)}/noite</p>
                     {r.status === "pendente" && (
                       <Button variant="outline" size="sm" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => cancelReservation(r.id)}>
                         <XCircle className="w-4 h-4 mr-2" /> Cancelar Reserva

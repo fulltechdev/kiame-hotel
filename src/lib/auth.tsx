@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+const ADMIN_CHECK_TIMEOUT_MS = 5000;
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -20,6 +22,27 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
+function checkAdminRole(userId: string, onResult: (isAdmin: boolean) => void) {
+  let settled = false;
+  const settle = (admin: boolean) => {
+    if (settled) return;
+    settled = true;
+    onResult(admin);
+  };
+  const timeoutId = setTimeout(() => settle(false), ADMIN_CHECK_TIMEOUT_MS);
+  void Promise.resolve(
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle()
+  ).then(
+    ({ data }) => settle(!!data),
+    () => settle(false)
+  ).then(() => clearTimeout(timeoutId));
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,43 +50,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        if (session?.user) {
-          // Check admin role
-          const { data } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", session.user.id)
-            .eq("role", "admin")
-            .maybeSingle();
-          setIsAdmin(!!data);
-        } else {
+      (_event, newSession) => {
+        setSession(newSession);
+        if (!newSession?.user) {
+          setLoading(false);
           setIsAdmin(false);
+        } else {
+          checkAdminRole(newSession.user.id, (admin) => {
+            setIsAdmin(admin);
+            setLoading(false);
+          });
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .eq("role", "admin")
-          .maybeSingle()
-          .then(({ data }) => {
-            setIsAdmin(!!data);
-            setLoading(false);
-          });
-      } else {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (cancelled) return;
+      setSession(initialSession);
+      if (!initialSession?.user) {
         setLoading(false);
+        setIsAdmin(false);
+      } else {
+        checkAdminRole(initialSession.user.id, (admin) => {
+          setIsAdmin(admin);
+          if (!cancelled) setLoading(false);
+        });
       }
     });
 
-    return () => subscription.unsubscribe();
+    const forceStopLoading = setTimeout(() => {
+      setLoading((prev) => (prev ? false : prev));
+    }, 8000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(forceStopLoading);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {

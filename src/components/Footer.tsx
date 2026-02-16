@@ -24,9 +24,9 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-accent">Contacto</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li>info@kiame.com</li>
-              <li>+351 912 345 678</li>
-              <li>Rua da Elegância, 42</li>
-              <li>Lisboa, Portugal</li>
+              <li>+244 912 345 678</li>
+              <li>Rua Comandante Bula</li>
+              <li>Uige, Angola</li>
             </ul>
           </div>
         </div>

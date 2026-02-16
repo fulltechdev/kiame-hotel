@@ -31,7 +31,7 @@ export default function Navbar() {
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm text-primary-foreground/80 hover:text-accent transition-colors tracking-wide uppercase">
+            <a key={l.href} href={l.href} className="text-sm text-primary-foreground/80 hover:text-accent transition-colors tracking-wide">
               {l.label}
             </a>
           ))}
@@ -64,10 +64,12 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile toggle */}
-        <button className="md:hidden text-primary-foreground" onClick={() => setOpen(!open)}>
-          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile: mode toggle + menu */}
+        <div className="md:hidden flex items-center gap-2">
+          <button className="text-primary-foreground" onClick={() => setOpen(!open)}>
+            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

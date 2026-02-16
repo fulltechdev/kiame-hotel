@@ -5,6 +5,10 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  optimizeDeps: {
+    // Corrige 504 "Outdated Optimize Dep": força re-otimização ao iniciar (pode remover depois)
+    force: true,
+  },
   server: {
     host: "::",
     port: 8080,
